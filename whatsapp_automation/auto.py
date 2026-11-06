@@ -10,17 +10,17 @@ import os
 import re
 import time
 import random
-from pathlib import Path
 import openpyxl
 from openpyxl import load_workbook
 import pywhatkit as pwk
+import os
 
 # =============================================================================
 # CONFIGURATION & TEMPLATES
 # =============================================================================
-BASE_DIR = Path(__file__).resolve().parent
-EXCEL_FILE = BASE_DIR / "Exposys Real Estate Bangalore.xlsx"
-IMAGE_PATH = str(BASE_DIR / "banner.jpeg")  # Path to image attachment file
+
+EXCEL_FILE = r"C://Users//ssgk4//OneDrive//Desktop//bengaluru-real-estate//whatsapp_automation//Exposys Real Estate Bangalore.xlsx"
+IMAGE_PATH = r"C://Users//ssgk4//OneDrive//Desktop//bengaluru-real-estate//whatsapp_automation//banner.jpeg"
 
 MESSAGE_TEMPLATE = """Hello,
 
@@ -101,12 +101,11 @@ def get_column_indices(sheet):
 # MAIN OUTREACH PIPELINE
 # =============================================================================
 def process_sheet_outreach(sheet_name, max_leads=2, image_path=IMAGE_PATH):
-    excel_path_obj = Path(EXCEL_FILE)
-    if not excel_path_obj.exists():
-        print(f"❌ Error: Spreadsheet '{EXCEL_FILE}' not found.")
+    if not os.path.exists(EXCEL_FILE):
+        print(f"Error: Spreadsheet '{EXCEL_FILE}' not found.")
         return
 
-    wb = load_workbook(str(excel_path_obj))
+    wb = load_workbook(EXCEL_FILE)
     
     # Case-insensitive sheet lookup
     matched_sheet_name = None
@@ -116,7 +115,7 @@ def process_sheet_outreach(sheet_name, max_leads=2, image_path=IMAGE_PATH):
             break
 
     if not matched_sheet_name:
-        print(f"❌ Sheet '{sheet_name}' not found. Available sheets: {wb.sheetnames}")
+        print(f"Sheet '{sheet_name}' not found. Available sheets: {wb.sheetnames}")
         return
 
     sheet = wb[matched_sheet_name]
@@ -202,24 +201,24 @@ def process_sheet_outreach(sheet_name, max_leads=2, image_path=IMAGE_PATH):
             processed_count += 1
             
         except Exception as e:
-            print(f"⚠️ Error or popup encountered for {formatted_phone}: {e}")
+            print(f"Error or popup encountered for {formatted_phone}: {e}")
             sheet.cell(row=row, column=status_col).value = "no whatsapp"
             sheet.cell(row=row, column=response_col).value = "no"
 
         # Save spreadsheet immediately after every attempt
-        wb.save(str(excel_path_obj))
+        wb.save(EXCEL_FILE)
             
         # Incremental save every 5 leads
         if processed_count % 5 == 0:
-            wb.save(str(excel_path_obj))
+            wb.save(EXCEL_FILE)
 
         # Anti-spam delay: random sleep between 1 and 3 seconds (minimum safe threshold for WhatsApp automation)
         delay = random.uniform(1, 3)
         print(f"Sleeping for {delay:.1f} seconds to protect account standing...")
         time.sleep(delay)
 
-    wb.save(str(excel_path_obj))
-    print(f"✅ Completed! {processed_count} messages sent on sheet '{matched_sheet_name}'. Excel file updated.")
+    wb.save(EXCEL_FILE)
+    print(f"Completed! {processed_count} messages sent on sheet '{matched_sheet_name}'. Excel file updated.")
 
 
 if __name__ == "__main__":
