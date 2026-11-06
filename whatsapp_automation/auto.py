@@ -1,7 +1,6 @@
 """
 Automated WhatsApp Outreach Script for Real Estate Leads
 -------------------------------------------------------
-
 Dependencies:
     pip install openpyxl pywhatkit pyautogui pandas
 """
@@ -13,14 +12,15 @@ import random
 import openpyxl
 from openpyxl import load_workbook
 import pywhatkit as pwk
-import os
+import pyautogui
 
 # =============================================================================
 # CONFIGURATION & TEMPLATES
 # =============================================================================
 
-EXCEL_FILE = r"C://Users//ssgk4//OneDrive//Desktop//bengaluru-real-estate//whatsapp_automation//Exposys Real Estate Bangalore.xlsx"
-IMAGE_PATH = r"C://Users//ssgk4//OneDrive//Desktop//bengaluru-real-estate//whatsapp_automation//banner.jpeg"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+EXCEL_FILE = os.path.join(BASE_DIR, "Exposys Real Estate Bangalore.xlsx")
+IMAGE_PATH = os.path.join(BASE_DIR, "banner.jpeg")
 
 MESSAGE_TEMPLATE = """Hello,
 
@@ -159,10 +159,11 @@ def process_sheet_outreach(sheet_name, max_leads=2, image_path=IMAGE_PATH):
         
         formatted_phone = format_phone_number(raw_phone)
 
-        # Skip invalid or missing phone numbers
+        # Skip invalid format or missing phone numbers
         if not formatted_phone:
             sheet.cell(row=row, column=status_col).value = "invalid number"
             sheet.cell(row=row, column=response_col).value = "no"
+            wb.save(EXCEL_FILE)
             continue
 
         # Format message template
@@ -176,49 +177,74 @@ def process_sheet_outreach(sheet_name, max_leads=2, image_path=IMAGE_PATH):
         print(f"[{processed_count + 1}/{max_leads}] Sending message to {company_name} ({formatted_phone})...")
 
         try:
-            # Send message with image attachment
+            # Send message via PyWhatKit
             if image_path and os.path.exists(image_path):
                 pwk.sendwhats_image(
                     receiver=formatted_phone,
                     img_path=image_path,
                     caption=custom_msg,
-                    wait_time=10,
-                    tab_close=True,
-                    close_time=3
+                    wait_time=12,
+                    tab_close=False
                 )
             else:
                 pwk.sendwhats_msg_instantly(
                     phone_no=formatted_phone,
                     message=custom_msg,
-                    wait_time=10,
-                    tab_close=True,
-                    close_time=3
+                    wait_time=12,
+                    tab_close=False
                 )
 
-            # Update existing columns on success
+            # Allow WhatsApp Web time to load the chat or popup
+            time.sleep(5)
+
+            # Check if the "isn't on WhatsApp" popup modal is present
+            # We take a quick screenshot sample of the center screen where the modal appears
+            screenshot = pyautogui.screenshot()
+            width, height = screenshot.size
+            
+            # Center region where the white popup card sits
+            center_region = screenshot.crop((int(width * 0.35), int(height * 0.35), int(width * 0.65), int(height * 0.65)))
+            
+            # Look for WhatsApp's distinct green "OK" button color inside the center box
+            invalid_popup_found = False
+            for x in range(0, center_region.width, 15):
+                for y in range(0, center_region.height, 15):
+                    r, g, b = center_region.getpixel((x, y))
+                    # WhatsApp button green signature (~ #00a884)
+                    if r < 40 and 140 < g < 210 and 90 < b < 170:
+                        invalid_popup_found = True
+                        break
+                if invalid_popup_found:
+                    break
+
+            if invalid_popup_found:
+                # Dismiss the popup by pressing Enter (clicks OK)
+                pyautogui.press('enter')
+                time.sleep(1.0)
+                raise ValueError("Number is not on WhatsApp")
+
+            # If valid, press Enter to send message / image
+            pyautogui.press('enter')
+            time.sleep(2)
+            
+            # Close active tab
+            pyautogui.hotkey('ctrl', 'w')
+
             sheet.cell(row=row, column=status_col).value = "sent"
             sheet.cell(row=row, column=response_col).value = "no"
             processed_count += 1
-            
+
         except Exception as e:
-            print(f"Error or popup encountered for {formatted_phone}: {e}")
+            print(f"No WhatsApp for {formatted_phone}: {e}")
             sheet.cell(row=row, column=status_col).value = "no whatsapp"
             sheet.cell(row=row, column=response_col).value = "no"
-
-        # Save spreadsheet immediately after every attempt
-        wb.save(EXCEL_FILE)
             
-        # Incremental save every 5 leads
-        if processed_count % 5 == 0:
-            wb.save(EXCEL_FILE)
-
-        # Anti-spam delay: random sleep between 1 and 3 seconds (minimum safe threshold for WhatsApp automation)
-        delay = random.uniform(1, 3)
-        print(f"Sleeping for {delay:.1f} seconds to protect account standing...")
-        time.sleep(delay)
+            # Ensure tab is closed cleanly
+            time.sleep(0.5)
+            pyautogui.hotkey('ctrl', 'w')
 
     wb.save(EXCEL_FILE)
-    print(f"Completed! {processed_count} messages sent on sheet '{matched_sheet_name}'. Excel file updated.")
+    print(f"Completed! {processed_count} messages processed on sheet '{matched_sheet_name}'. Excel file updated.")
 
 
 if __name__ == "__main__":
