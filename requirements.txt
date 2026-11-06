@@ -1,27 +1,24 @@
-# Data Extraction & HTTP Requests
+# ==============================================================================
+# Bengaluru Real Estate Intelligence Platform - Dependencies
+# ==============================================================================
 
+# Core Data Extraction & HTTP Requests
 requests>=2.31.0
-
 python-dotenv>=1.0.1
+beautifulsoup4>=4.12.3
+lxml>=5.0.0
 
-
-
-# Data Manipulation & Analysis
-
+# Data Manipulation & Excel Backend
 pandas>=2.2.0
-
 openpyxl>=3.1.2
 
-
-
-# Dashboard & UI
-
+# Web Dashboard UI
 streamlit>=1.31.0
 
+# Headless Browser Automation (Optional Website Auditing)
+playwright>=1.40.0
 
-
-# Web Automation & Scraping (For secondary enrichment)
-
-beautifulsoup4>=4.12.3
-
-selenium>=4.18.0
+# WhatsApp Outreach Automation (Optional Outreach Engine)
+pywhatkit>=5.4
+pyautogui>=0.9.54
+Pillow>=10.0.0

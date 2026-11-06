@@ -1,5 +1,61 @@
-.env
-venv/
+# ==============================================================================
+# Git Ignore Configuration - Bengaluru Real Estate Platform
+# ==============================================================================
+
+# Python Bytecode & Cache
 __pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+**/venv/
+**/.venv/
+**/env/
+
+# Environment Variables & Secrets (CRITICAL: Never commit API keys)
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+**/*.env
+!.env.example
+!**/.env.example
+
+# IDE, Editor & Tool Settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# WhatsApp Automation Logs & PyWhatKit artifacts
+PyWhatKit_DB.txt
+**/PyWhatKit_DB.txt
+*.log
+
+# Scraper temporary/raw outputs (keep directory structure via .gitkeep)
 data/raw/*
+!data/raw/.gitkeep
 data/processed/*
+!data/processed/.gitkeep
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*

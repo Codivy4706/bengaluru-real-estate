@@ -1,0 +1,5 @@
+pandas>=2.2.0
+openpyxl>=3.1.2
+pywhatkit>=5.4
+pyautogui>=0.9.54
+Pillow>=10.0.0
