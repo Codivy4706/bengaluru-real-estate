@@ -1,8 +1,10 @@
 """Send WhatsApp outreach from a dynamically selected Excel worksheet.
 
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install pywin32
+python -m pip install -r requirements.txt
 python -m playwright install chromium
-python auto.py
+hit run button in IDE or run in terminal:
 """
 
 import os
@@ -273,8 +275,6 @@ def process_sheet_outreach(sheet_name, max_leads=MAX_LEADS, image_path=IMAGE_PAT
                     print("Stopped by user. Spreadsheet changes saved.")
                     break
                 except Exception as exc:
-                    # Do not mislabel browser/network/login failures as an
-                    # invalid WhatsApp number. The row can be reviewed and retried.
                     sheet.cell(row, status_col, "error")
                     sheet.cell(row, response_col, "no")
                     print(f"  --> Could not process this row: {exc}")
