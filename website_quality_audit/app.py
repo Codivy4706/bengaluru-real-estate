@@ -35,7 +35,7 @@ def main():
         print(f"❌ Excel input file not found at {INPUT_FILE}!")
         return
 
-    print(f"📂 Using input file: {INPUT_FILE}")
+    print(f"Using input file: {INPUT_FILE}")
 
     # Read the main worksheet
     df = pd.read_excel(
